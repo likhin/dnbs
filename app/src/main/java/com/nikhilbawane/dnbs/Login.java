@@ -17,7 +17,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,7 +27,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
 public class Login extends AppCompatActivity {
 
@@ -45,6 +43,10 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         log("onCreate STARTED");
 
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+//        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE|
+//                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = getWindow(); // in Activity's onCreate() for instance
             w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
@@ -57,6 +59,7 @@ public class Login extends AppCompatActivity {
             startActivity(intent);
             finish();
         }
+
         setContentView(R.layout.activity_login);
 
         mEditUser = (EditText) findViewById(R.id.editUser);
@@ -165,9 +168,12 @@ public class Login extends AppCompatActivity {
                 getSharedPreferences("dnbsPrefs", MODE_PRIVATE).edit()
                     .putString("user", result.toString()).apply();
 
+                // Create an object from the json result string
+                JSONObject jsonResult = new JSONObject(result.toString());
+
                 // The server returns an empty if there no users found
                 // Thus we can check if we have a valid user
-                if(!result.toString().equals("")) {
+                if(!jsonResult.getString("role").equals("")) {
                     // user found
                     return true;
                 }
