@@ -1,6 +1,6 @@
 package com.nikhilbawane.dnbs;
 
-public class Notice {
+class Notice {
     int id;
     String user;
     String title;

@@ -2,9 +2,11 @@ package com.nikhilbawane.dnbs;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,33 +24,47 @@ public class NoticeTransaction extends AsyncTask<Void, Void, Void> {
 
     private String DNBS_URL;
 
-    private int byGetOrPost = 0;
+    private int flag = 0;
     private RecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private List<Notice> noticeList;
     private Context context;
     private JSONObject jsonObject;
+    private View view;
+    String role;
 
     //flag 0 means get and 1 means post.(By default it is get.)
-    public NoticeTransaction(Context context, RecyclerView mRecyclerView, SwipeRefreshLayout mSwipeRefreshLayout, List<Notice> list, int flag) {
+    NoticeTransaction(Context context, RecyclerView mRecyclerView,
+                      SwipeRefreshLayout mSwipeRefreshLayout, List<Notice> list,
+                      int flag, String role) {
         this.context = context;
         this.mRecyclerView = mRecyclerView;
         this.mSwipeRefreshLayout = mSwipeRefreshLayout;
         this.noticeList = list;
+        this.flag = flag;
+        this.role = role;
         DNBS_URL = context.getResources().getString(R.string.dnbs_url);
-        byGetOrPost = flag;
     }
 
-    public NoticeTransaction(Context context, JSONObject jsonObject, int flag) {
+    NoticeTransaction(Context context, JSONObject jsonObject, int flag, String role) {
         this.jsonObject = jsonObject;
-        byGetOrPost = flag;
+        this.flag = flag;
+        this.role = role;
+        DNBS_URL = context.getResources().getString(R.string.dnbs_url);
+    }
+
+    NoticeTransaction(View view, Context context, JSONObject jsonObject, int flag, String role) {
+        this.view = view;
+        this.jsonObject = jsonObject;
+        this.flag = flag;
+        this.role = role;
         DNBS_URL = context.getResources().getString(R.string.dnbs_url);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if (byGetOrPost == 0) {
+        if (flag == 0) {
             if (!mSwipeRefreshLayout.isRefreshing()) {
                 mSwipeRefreshLayout.setRefreshing(true);
             }
@@ -57,7 +73,7 @@ public class NoticeTransaction extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... arg) {
-        if(byGetOrPost == 0){ //means by Get Method
+        if(flag == 0){ //means get notices
             try{
                 log("GET: doInBackground STARTED");
 
@@ -111,9 +127,9 @@ public class NoticeTransaction extends AsyncTask<Void, Void, Void> {
                 log("Exception(Get): " + e.getMessage());
             }
         }
-        else{
+        else if(flag == 1){ //means send notice
             try{
-                log("POST: doInBackground STARTED");
+                log("POST send: doInBackground STARTED");
 
                 String link = DNBS_URL + "/sendNotice.php";
                 URL url = new URL(link);
@@ -123,7 +139,7 @@ public class NoticeTransaction extends AsyncTask<Void, Void, Void> {
                 conn.setDoOutput(true);
                 conn.connect();
 
-                log("POST: jsonObject = " + jsonObject.toString());
+                log("POST send: jsonObject = " + jsonObject.toString());
 
                 OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
                 String output = jsonObject.toString();
@@ -131,7 +147,7 @@ public class NoticeTransaction extends AsyncTask<Void, Void, Void> {
                 writer.flush();
                 writer.close();
 
-                log("POST: jsonObject written to output stream.");
+                log("POST send: jsonObject written to output stream.");
 
                 InputStream input = conn.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(input));
@@ -141,7 +157,46 @@ public class NoticeTransaction extends AsyncTask<Void, Void, Void> {
                 while ((line = reader.readLine()) != null) {
                     result.append(line);
                 }
-                log("POST: result = " + result.toString());
+                log("POST send: result = " + result.toString());
+
+                conn.disconnect();
+
+            }
+            catch(Exception e){
+                log("Exception(Post): " + e.getMessage());
+            }
+        }
+        else if(flag == 2){ //means delete notice
+            try{
+                log("POST delete: doInBackground STARTED");
+
+                String link = DNBS_URL + "/deleteNotice.php";
+                URL url = new URL(link);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type","application/json");
+                conn.setDoOutput(true);
+                conn.connect();
+
+                log("POST delete: jsonObject = " + jsonObject.toString());
+
+                OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+                String output = jsonObject.toString();
+                writer.write(output);
+                writer.flush();
+                writer.close();
+
+                log("POST delete: jsonObject written to output stream.");
+
+                InputStream input = conn.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                StringBuilder result = new StringBuilder();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+                log("POST delete: result = " + result.toString());
 
                 conn.disconnect();
 
@@ -157,11 +212,14 @@ public class NoticeTransaction extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPostExecute(Void voidArg){
         super.onPostExecute(voidArg);
-        if(byGetOrPost == 0) {
+        if(flag == 0) {
             log("noticeList size is " + noticeList.size());
-            RVAdapter adapter = new RVAdapter(noticeList);
+            RVAdapter adapter = new RVAdapter(noticeList, view, context, role);
             mRecyclerView.setAdapter(adapter);
             mSwipeRefreshLayout.setRefreshing(false);
+        } else if(flag == 2) {
+            Snackbar.make(view, "Notice deleted.", Snackbar.LENGTH_LONG)
+                    .show();
         }
     }
 

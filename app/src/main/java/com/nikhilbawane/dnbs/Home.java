@@ -87,6 +87,7 @@ public class Home extends Fragment {
     private String FAB_FLAG = "fab_flag";
     private String SORT_FLAG = "sort_flag";
     private JSONObject userJSON;
+    private String userRole;
 
     // 'notices' contains the full set of Notices received from the server.
     // 'visibleObjects' uses the data from notices by default.
@@ -119,6 +120,7 @@ public class Home extends Fragment {
             userJSON = new JSONObject(settings.getString("user", null));
             log("userJSON = " + userJSON.toString());
             log("user = " + settings.getString("user", null));
+            userRole = userJSON.getString("role");
         }
         catch (Exception e) {
             log("onCreate: JSON: " + e.getMessage());
@@ -404,7 +406,7 @@ public class Home extends Fragment {
     // Initialises RecyclerView Adapter by passing 'list' as parameter.
     private void initializeAdapter(List<Notice> list){
         log("initializedAdapter() STARTED");
-        RVAdapter adapter = new RVAdapter(list);
+        RVAdapter adapter = new RVAdapter(list, mCoordinatorLayout, this.getContext(), userRole);
         adapter.notifyDataSetChanged();
         mRecyclerView.setAdapter(adapter);
     }
@@ -425,10 +427,12 @@ public class Home extends Fragment {
         log("refreshNoticeData STARTED");
 
         if (checkNetwork()) {
-            new NoticeTransaction(getActivity(), mRecyclerView, mSwipeRefreshLayout, notices, 0).execute();
+            new NoticeTransaction(getActivity(), mRecyclerView,
+                    mSwipeRefreshLayout, notices, 0, userRole).execute();
 
         } else {
-            Snackbar.make(mCoordinatorLayout, "No network connection available.", Snackbar.LENGTH_LONG)
+            Snackbar.make(mCoordinatorLayout, "No network connection available.",
+                    Snackbar.LENGTH_LONG)
                     .show();
         }
     }
@@ -494,7 +498,8 @@ public class Home extends Fragment {
         else {
             log("loadNotices: theJson is empty... initialising data");
             try {
-                new NoticeTransaction(getActivity(), mRecyclerView, mSwipeRefreshLayout, visibleObjects, 0).execute().get();
+                new NoticeTransaction(getActivity(), mRecyclerView, mSwipeRefreshLayout,
+                        visibleObjects, 0, userRole).execute().get();
             }
             catch (Exception e) {
                 log("loadNotices: Exception: " + e.getMessage());
@@ -557,7 +562,7 @@ public class Home extends Fragment {
                              + "}";
 
                 JSONObject mJSON = new JSONObject(jason);
-                new NoticeTransaction(getActivity(), mJSON, 1).execute();
+                new NoticeTransaction(getActivity(), mJSON, 1, userRole).execute();
             }
             catch (JSONException e) {
                 log("sendNotice: JSONException: " + e.getMessage());
@@ -578,11 +583,38 @@ public class Home extends Fragment {
 
     }
 
-    public class UpdateApp extends AsyncTask<Void, String, Integer> {
+    public void deleteNotice(final View view, final int noticeId, final Context context, final String role) {
+        new AlertDialog.Builder(context)
+                .setTitle("Delete")
+                .setMessage("Are you sure you want to delete this notice?")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        log("deleteNotice: noticeId: " + noticeId + ", role: " + role);
+                        try {
+                            String jason = "{'id':'" + noticeId + "'}";
+
+                            if((noticeId != -1) && (role != null)) {
+                                JSONObject mJSON = new JSONObject(jason);
+                                new NoticeTransaction(view, context, mJSON, 2, role).execute();
+                            }
+                        } catch (Exception e) {
+                            log("deleteNotice: JSONException: " + e.getMessage());
+                        }
+                    }
+                })
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                })
+                .show();
+    }
+
+    private class UpdateApp extends AsyncTask<Void, String, Integer> {
         boolean flag;
         ProgressDialog progDialog;
 
-        public UpdateApp(boolean flag) {
+        UpdateApp(boolean flag) {
             this.flag = flag;
         }
 
@@ -710,7 +742,7 @@ public class Home extends Fragment {
                     PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
                     int version = pInfo.versionCode;
                     log("UpdateApp: onPostExecute: version = " + version);
-                    if (i > version) {
+                    if (i > version && i != 404) {
                         new AlertDialog.Builder(getActivity())
                                 .setTitle("Update")
                                 .setMessage("New app update is available.\nUpdate now?")
