@@ -107,6 +107,14 @@ public class DNBS extends AppCompatActivity {
             setFragment(new Settings());
             return true;
         }
+        else if (id == R.id.action_about) {
+            mDrawerToggle.setDrawerIndicatorEnabled(false);
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+            setFragment(new About());
+            return true;
+        }
+
+
 
         return super.onOptionsItemSelected(item);
 
