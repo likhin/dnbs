@@ -4,7 +4,6 @@ import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.DrawerLayout;
 import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,10 +18,7 @@ public class About extends Fragment {
         log("onCreatView STARTED");
 
         View v = inflater.inflate(R.layout.fragment_about, container, false);
-
-        //((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.title_about);
-
-        ((DNBS) getActivity()).resetActionBar(true, DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        ((DNBS) getActivity()).getSupportActionBar().setTitle("About");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             TextView aboutTitle = (TextView) v.findViewById(R.id.about_title);

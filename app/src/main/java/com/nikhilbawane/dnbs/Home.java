@@ -19,7 +19,6 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -201,7 +200,6 @@ public class Home extends Fragment {
                 mFormCard.setEnabled(true);
                 mFormFrame.setClickable(true);
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.title_add_notice);
-                ((DNBS) getActivity()).resetActionBar(true, DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
             }
         });
 
@@ -222,7 +220,6 @@ public class Home extends Fragment {
                 mFormCard.setEnabled(false);
                 mFormFrame.setClickable(false);
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.title_home);
-                ((DNBS) getActivity()).resetActionBar(false, DrawerLayout.LOCK_MODE_UNLOCKED);
             }
         });
 

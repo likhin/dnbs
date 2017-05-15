@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,10 +24,7 @@ public class Settings extends Fragment {
         log("onCreateView STARTED");
 
         View v = inflater.inflate(R.layout.fragment_settings, container, false);
-
-        //((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.title_settings);
-
-        ((DNBS) getActivity()).resetActionBar(true, DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        ((DNBS) getActivity()).getSupportActionBar().setTitle("Settings");
 
         final SharedPreferences settings = getActivity().getSharedPreferences("dnbsPrefs", Context.MODE_PRIVATE);
 
