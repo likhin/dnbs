@@ -51,9 +51,17 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="role"
+                        android:id="@+id/user_role"
+                        android:layout_below="@+id/user_email"
+                        android:padding="2dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:text="year"
                         android:id="@+id/user_year"
-                        android:layout_below="@+id/user_email"
+                        android:layout_below="@+id/user_role"
                         android:padding="2dp"/>
                 </RelativeLayout>
 
