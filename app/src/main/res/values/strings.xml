@@ -52,5 +52,9 @@
     <string name="title_settings">Settings</string>
     <string name="title_home">Home</string>
     <string name="title_add_notice">Add Notice</string>
+    <string name="button_login">Login</string>
+    <string name="hint_username">username</string>
+    <string name="hint_password">password</string>
+    <string name="logo_desc">dnbs_logo</string>
 
 </resources>
