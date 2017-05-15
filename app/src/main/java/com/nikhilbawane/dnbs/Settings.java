@@ -35,12 +35,14 @@ public class Settings extends Fragment {
         try {
             TextView name = (TextView) v.findViewById(R.id.user_name);
             TextView email = (TextView) v.findViewById(R.id.user_email);
+            TextView role = (TextView) v.findViewById(R.id.user_role);
             TextView year = (TextView) v.findViewById(R.id.user_year);
 
             JSONObject userJSON = new JSONObject(settings.getString("user", null));
 
             name.setText("Name:\t" + userJSON.getString("name"));
             email.setText("Email:\t" + userJSON.getString("email"));
+            role.setText("Role:\t" + userJSON.getString("role"));
             switch (userJSON.getInt("year")) {
                 case 2 :
                     year.setText("Year:\t\tSecond");
