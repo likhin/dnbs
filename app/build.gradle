@@ -61,7 +61,13 @@ dependencies {
     compile "com.android.support:design:$rootProject.ext.supportLibraryVersion"
     compile "com.android.support.constraint:constraint-layout:$rootProject.ext.constraintlayoutVersion"
     compile "com.google.guava:guava:$rootProject.ext.guavaVersion"
+
+    // OkHttp
     compile "com.squareup.okhttp3:okhttp:$rootProject.ext.okhttpVersion"
+
+    // Butterknife
+    compile "com.jakewharton:butterknife:$rootProject.ext.butterknifeVersion"
+    annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.ext.butterknifeVersion"
 
     testCompile "org.mockito:mockito-all:$rootProject.ext.mockitoVersion"
     testCompile "junit:junit:$rootProject.ext.junitVersion"

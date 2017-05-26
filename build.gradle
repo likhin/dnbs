@@ -42,4 +42,5 @@ ext {
     rulesVersion = '0.5'
     espressoVersion = '2.2.2'
     okhttpVersion = '3.8.0'
+    butterknifeVersion = '8.6.0'
 }
