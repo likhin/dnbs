@@ -1,162 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/formFrameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/card_form"
     android:padding="8dp">
 
     <android.support.v7.widget.CardView
+        android:id="@+id/formCardView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/form_card">
+        android:layout_height="match_parent">
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <ScrollView
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_above="@+id/footer">
+
                 <LinearLayout
-                    android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:padding="16dp">
 
                     <TextView
+                        android:id="@+id/titleTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Title:"
-                        android:textAllCaps="true"
-                        android:id="@+id/addTitle" />
+                        android:textAllCaps="true" />
 
                     <EditText
+                        android:id="@+id/titleEditText"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/editAddTitle" />
+                        android:layout_height="wrap_content" />
 
                     <TextView
+                        android:id="@+id/descTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
                         android:text="Description:"
-                        android:textAllCaps="true"
-                        android:layout_marginTop="8dp"
-                        android:id="@+id/addDesc" />
+                        android:textAllCaps="true" />
 
                     <EditText
+                        android:id="@+id/descEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textMultiLine"
                         android:ems="10"
-                        android:id="@+id/editAddDesc" />
+                        android:inputType="textMultiLine" />
 
                     <TextView
+                        android:id="@+id/priorityTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Priority:"
-                        android:textAllCaps="true"
                         android:layout_marginTop="8dp"
-                        android:id="@+id/addPriority" />
+                        android:text="Priority:"
+                        android:textAllCaps="true" />
 
                     <RatingBar
+                        android:id="@+id/priorityRatingBar"
+                        style="@style/customRatingBar"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        style="@style/customRatingBar"
-                        android:id="@+id/ratePriority"
+                        android:numStars="5"
                         android:scaleX="0.8"
                         android:scaleY="0.8"
-                        android:stepSize="1.0"
-                        android:numStars="5"/>
+                        android:stepSize="1.0" />
 
                     <TextView
+                        android:id="@+id/tagTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Category:"
-                        android:textAllCaps="true"
                         android:layout_marginTop="8dp"
-                        android:id="@+id/addTag" />
+                        android:text="Category:"
+                        android:textAllCaps="true" />
 
                     <RadioGroup
+                        android:id="@+id/tagRadioGroup"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/tagRG">
+                        android:layout_height="wrap_content">
 
                         <RadioButton
+                            android:id="@+id/circularsRB"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/circulars"
-                            android:id="@+id/univRB" />
+                            android:text="@string/circulars" />
 
                         <RadioButton
+                            android:id="@+id/noticesRB"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/notices"
-                            android:id="@+id/deptRB" />
+                            android:text="@string/notices" />
                     </RadioGroup>
 
                     <RelativeLayout
+                        android:id="@+id/addYearRL"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
-                        android:id="@+id/addYearRL">
+                        android:layout_height="wrap_content">
+
                         <TextView
+                            android:id="@+id/addYearTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Year:"
-                            android:textAllCaps="true"
                             android:layout_marginTop="8dp"
-                            android:id="@+id/addYear" />
+                            android:text="Year:"
+                            android:textAllCaps="true" />
 
                         <CheckBox
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Second"
                             android:id="@+id/cbYear2"
-                            android:layout_margin="8dp"
-                            android:layout_below="@+id/addYear" />
-
-                        <CheckBox
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Third"
+                            android:layout_below="@+id/addYearTextView"
+                            android:layout_margin="8dp"
+                            android:text="Second" />
+
+                        <CheckBox
                             android:id="@+id/cbYear3"
-                            android:layout_margin="8dp"
-                            android:layout_below="@+id/addYear"
-                            android:layout_toRightOf="@+id/cbYear2" />
-
-                        <CheckBox
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Final"
-                            android:id="@+id/cbYear4"
+                            android:layout_below="@+id/addYearTextView"
                             android:layout_margin="8dp"
-                            android:layout_below="@+id/addYear"
-                            android:layout_toRightOf="@+id/cbYear3" />
+                            android:layout_toRightOf="@+id/cbYear2"
+                            android:text="Third" />
+
+                        <CheckBox
+                            android:id="@+id/cbYear4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/addYearTextView"
+                            android:layout_margin="8dp"
+                            android:layout_toRightOf="@+id/cbYear3"
+                            android:text="Final" />
                     </RelativeLayout>
                 </LinearLayout>
             </ScrollView>
+
             <FrameLayout
                 android:id="@+id/footer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
                 android:layout_alignParentBottom="true"
-                android:background="@color/cardview_light_background">
+                android:background="@color/cardview_light_background"
+                android:padding="8dp">
+
                 <Button
+                    android:id="@+id/cancelButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Cancel"
-                    android:id="@+id/form_cancel"
                     android:layout_gravity="left"
                     android:background="@color/clear"
+                    android:text="Cancel"
                     android:textColor="@color/colorAccent" />
+
                 <Button
+                    android:id="@+id/submitButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Submit"
-                    android:id="@+id/form_submit"
                     android:layout_gravity="right"
                     android:background="@color/clear"
+                    android:text="Submit"
                     android:textColor="@color/colorPrimary" />
             </FrameLayout>
         </RelativeLayout>

@@ -1,98 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardNotice"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginEnd="8dp"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
+    android:layout_marginStart="8dp"
     android:layout_marginTop="8dp"
-    android:id="@+id/cv">
+    android:animateLayoutChanges="true">
 
-    <ImageView
-        android:id="@+id/notice_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:tint="@color/colorAccent"
-        app:srcCompat="@drawable/ic_clear_black_24dp"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="12dp"
-        android:layout_gravity="end"
-        android:padding="4dp"/>
-
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Title"
-            android:id="@+id/notice_title"
-            android:textSize="25sp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rounded_corner"
-            android:textColor="#F5F5F5"
-            android:text="Description"
-            android:id="@+id/notice_desc"
-            android:layout_below="@+id/notice_title"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <RelativeLayout
+            android:id="@+id/notice_head"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/notice_desc"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp" >
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:layout_width="36sp"
-                android:layout_height="wrap_content"
-                android:text="Tag"
-                android:id="@+id/notice_tag"
-                android:gravity="right"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                android:paddingLeft="2dp" />
-
-            <TextView
+            <RatingBar
+                android:id="@+id/notice_priority"
+                style="?android:attr/ratingBarStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Date"
-                android:id="@+id/notice_date"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:layout_alignParentBottom="false" />
+                android:layout_centerVertical="true"
+                android:isIndicator="true"
+                android:numStars="5"
+                android:stepSize="1.0" />
 
-            <LinearLayout
+            <ImageView
+                android:id="@+id/notice_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/notice_tag"
-                android:layout_toLeftOf="@+id/notice_tag"
-                android:layout_alignBottom="@+id/notice_tag">
-                <RatingBar
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="?android:attr/ratingBarStyleSmall"
-                    android:id="@+id/notice_priority"
-                    android:stepSize="1.0"
-                    android:numStars="5"
-                    android:isIndicator="true" />
-            </LinearLayout>
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/notice_delete_icon"
+                android:tint="@color/colorAccent"
+                app:srcCompat="@drawable/ic_clear_black_24dp"
+                tools:layout_editor_absoluteX="12dp"
+                tools:layout_editor_absoluteY="12dp" />
+
         </RelativeLayout>
 
+        <TextView
+            android:id="@+id/notice_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:textSize="25sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/notice_head"
+            tools:text="Title" />
 
-    </RelativeLayout>
+        <TextView
+            android:id="@+id/notice_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/rounded_corner"
+            android:textColor="#F5F5F5"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/notice_title"
+            tools:text="Description" />
 
+        <RelativeLayout
+            android:id="@+id/notice_foot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/notice_desc">
+
+            <TextView
+                android:id="@+id/notice_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="false"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_toLeftOf="@+id/notice_tag"
+                android:layout_toStartOf="@+id/notice_tag"
+                tools:text="Date" />
+
+            <TextView
+                android:id="@+id/notice_tag"
+                android:layout_width="24dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:gravity="center"
+                tools:text="Tag" />
+
+        </RelativeLayout>
+    </LinearLayout>
 </android.support.v7.widget.CardView>

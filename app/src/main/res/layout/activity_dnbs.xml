@@ -6,8 +6,8 @@
     android:orientation="vertical">
 
     <android.support.design.widget.AppBarLayout
-        android:layout_height="?attr/actionBarSize"
-        android:layout_width="match_parent">
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize">
 
         <include
             layout="@layout/toolbar"
@@ -16,8 +16,8 @@
     </android.support.design.widget.AppBarLayout>
 
     <FrameLayout
-        android:name="com.nikhilbawane.dnbs.Home"
         android:id="@+id/fragment_container"
+        android:name="com.nikhilbawane.dnbs.Home"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </LinearLayout>
