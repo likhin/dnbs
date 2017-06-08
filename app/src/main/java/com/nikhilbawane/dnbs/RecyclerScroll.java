@@ -2,12 +2,12 @@ package com.nikhilbawane.dnbs;
 
 import android.support.v7.widget.RecyclerView;
 
-public abstract class RecyclerScroll extends RecyclerView.OnScrollListener {
+abstract class RecyclerScroll extends RecyclerView.OnScrollListener {
 
-    int scrollDist = 0;
-    boolean isVisible = true;
+    private int scrollDist = 0;
+    private boolean isVisible = true;
 
-    static final float MINIMUM = 25;
+    private static final float MINIMUM = 25;
 
     @Override
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {

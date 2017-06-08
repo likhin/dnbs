@@ -114,7 +114,7 @@ public class NoticeTransaction extends AsyncTask<Void, Void, Void> {
                     }
 
                     context.getSharedPreferences("dnbsPrefs", Context.MODE_PRIVATE).edit()
-                            .putString("theJson",jArray.toString()).commit();
+                            .putString("theJson",jArray.toString()).apply();
                 }
                 catch (Exception e)
                 {

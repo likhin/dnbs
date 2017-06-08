@@ -26,14 +26,12 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -68,31 +66,47 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
+import butterknife.BindString;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class Home extends Fragment {
 
-    private String DNBS_URL;
+    @BindString(R.string.dnbs_url) String DNBS_URL;
 
-    public FloatingActionButton mFAB;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private CoordinatorLayout mCoordinatorLayout;
-    private FrameLayout mFormFrame;
-    private CardView mFormCard;
-    private RecyclerView mRecyclerView;
-    private Button mButtonCancel;
-    private Button mButtonSubmit;
+    @BindView(R.id.fabButton) FloatingActionButton fabButton;
+    @BindView(R.id.swipeRefreshLayout) SwipeRefreshLayout swipeRefreshLayout;
+    @BindView(R.id.container) CoordinatorLayout coordinatorLayout;
+    @BindView(R.id.formFrameLayout) FrameLayout formFrameLayout;
+    @BindView(R.id.formCardView) CardView formCardView;
+    @BindView(R.id.recyclerView) RecyclerView recyclerView;
+    @BindView(R.id.cancelButton) Button cancelButton;
+
+    @BindView(R.id.titleEditText) EditText editTitle;
+    @BindView(R.id.descEditText) EditText editDesc;
+    @BindView(R.id.priorityRatingBar) RatingBar ratingBar;
+    @BindView(R.id.tagRadioGroup) RadioGroup tagRadioGroup;
+    @BindView(R.id.addYearRL) RelativeLayout addYearRL;
+    @BindView(R.id.cbYear2) CheckBox cbYear2;
+    @BindView(R.id.cbYear3) CheckBox cbYear3;
+    @BindView(R.id.cbYear4) CheckBox cbYear4;
+
     private Animation animation;
-    private int appStartFlag = 0;
-    private int sortFlag = 0;
-    private String FAB_FLAG = "fab_flag";
-    private String SORT_FLAG = "sort_flag";
+    private ValueAnimator colorAnimation;
     private JSONObject userJSON;
     private String userRole;
+    private int appStartFlag = 0;
+    private int sortFlag = 0;
 
     // 'notices' contains the full set of Notices received from the server.
-    // 'visibleObjects' uses the data from notices by default.
-    // All sorting and filtering of Notices is reflected in visibleObjects.
+    // 'visibleNotices' uses the data from notices by default.
+    // All sorting and filtering of Notices is reflected in visibleNotices.
     private List<Notice> notices;
-    private List<Notice> visibleObjects;
+    private List<Notice> visibleNotices;
+
+    private final String FAB_FLAG = "fab_flag";
+    private final String SORT_FLAG = "sort_flag";
 
     private SharedPreferences settings;
 
@@ -100,8 +114,6 @@ public class Home extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         log("onCreate STARTED");
-
-        DNBS_URL = getResources().getString(R.string.dnbs_url);
 
         setHasOptionsMenu(true);
         if(savedInstanceState != null) {
@@ -111,7 +123,7 @@ public class Home extends Fragment {
         }
 
         notices = new ArrayList<>();
-        visibleObjects = new ArrayList<>();
+        visibleNotices = new ArrayList<>();
 
         settings = getActivity().getSharedPreferences("dnbsPrefs", Context.MODE_PRIVATE);
 
@@ -131,21 +143,18 @@ public class Home extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         log("onCreateView STARTED");
         View v = inflater.inflate(R.layout.fragment_home, container, false);
-
-        //((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.title_home);
+        ButterKnife.bind(this, v);
 
         if (savedInstanceState != null) {
             appStartFlag = savedInstanceState.getInt(FAB_FLAG);
             sortFlag = savedInstanceState.getInt(SORT_FLAG);
         }
 
-        mFAB = (FloatingActionButton) v.findViewById(R.id.fabBtn);
-
         try {
             if((userJSON.getString("role")).equals("student")) {
-                mFAB.setVisibility(View.GONE);
-                mFAB.setEnabled(false);
-                mFAB.invalidate();
+                fabButton.setVisibility(View.GONE);
+                fabButton.setEnabled(false);
+                fabButton.invalidate();
             }
         }
         catch(Exception e) {
@@ -155,57 +164,50 @@ public class Home extends Fragment {
 
         if(appStartFlag == 0) {
 
-            mFAB.post(new Runnable() {
+            fabButton.post(new Runnable() {
                           @Override
                           public void run() {
                               appStartFlag = 1;
-                              log("mFAB animation STARTED");
+                              log("fabButton animation STARTED");
                               animation = AnimationUtils.loadAnimation(getActivity(), R.anim.simple_grow);
-                              mFAB.startAnimation(animation);
+                              fabButton.startAnimation(animation);
                           }
                       }
             );
         }
 
-        mCoordinatorLayout = (CoordinatorLayout) v.findViewById(R.id.container);
+        coordinatorLayout = (CoordinatorLayout) v.findViewById(R.id.container);
 
-        WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
         Point size = new Point();
-        display.getSize(size);
+        getActivity().getWindowManager().getDefaultDisplay().getSize(size);
         final int width = size.x;
 
-        mFormCard = (CardView) v.findViewById(R.id.form_card);
-        mFormCard.setTranslationX(width);
-        mFormCard.setEnabled(false);
-
-        mFormFrame = (FrameLayout) v.findViewById(R.id.card_form);
+        formCardView.setTranslationX(width);
+        formCardView.setEnabled(false);
 
         Integer colorFrom = getResources().getColor(R.color.clear);
         Integer colorTo = getResources().getColor(R.color.shade);
-        final ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
+        colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
         colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animator) {
-                mFormFrame.setBackgroundColor((Integer) animator.getAnimatedValue());
+                formFrameLayout.setBackgroundColor((Integer) animator.getAnimatedValue());
             }
         });
 
-        mFAB.setOnClickListener(new View.OnClickListener() {
+        fabButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mFAB.animate().setDuration(500).setInterpolator(new DecelerateInterpolator(1)).translationX(-width);
-                mFormCard.animate().setDuration(500).setInterpolator(new DecelerateInterpolator(1)).translationX(0);
+                fabButton.animate().setDuration(500).setInterpolator(new DecelerateInterpolator(1)).translationX(-width);
+                formCardView.animate().setDuration(500).setInterpolator(new DecelerateInterpolator(1)).translationX(0);
                 colorAnimation.setDuration(500).start();
-                mFormCard.setEnabled(true);
-                mFormFrame.setClickable(true);
+                formCardView.setEnabled(true);
+                formFrameLayout.setClickable(true);
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.title_add_notice);
             }
         });
 
-        mButtonCancel = (Button) v.findViewById(R.id.form_cancel);
-
-        mButtonCancel.setOnClickListener(new View.OnClickListener() {
+        cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //Close the software keyboard
@@ -213,55 +215,34 @@ public class Home extends Fragment {
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
                 //Make animations
-                mFAB.animate().setDuration(500).setInterpolator(new DecelerateInterpolator(1)).translationX(0);
-                mFormCard.animate().setDuration(500).setInterpolator(new DecelerateInterpolator(1)).translationX(width);
+                fabButton.animate().setDuration(500).setInterpolator(new DecelerateInterpolator(1)).translationX(0);
+                formCardView.animate().setDuration(500).setInterpolator(new DecelerateInterpolator(1)).translationX(width);
                 colorAnimation.setDuration(500).reverse();
 
-                mFormCard.setEnabled(false);
-                mFormFrame.setClickable(false);
+                formCardView.setEnabled(false);
+                formFrameLayout.setClickable(false);
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.title_home);
             }
         });
 
-        mButtonSubmit = (Button) v.findViewById(R.id.form_submit);
-        final View tempView = v;
-
-        RadioGroup rgTag = (RadioGroup) v.findViewById(R.id.tagRG);
-        final RelativeLayout mAddYearRL = (RelativeLayout) v.findViewById(R.id.addYearRL);
-        mAddYearRL.setVisibility(View.INVISIBLE);
-
-        rgTag.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        addYearRL.setVisibility(View.INVISIBLE);
+        tagRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
                 switch (i) {
-                    case R.id.univRB:
-                        mAddYearRL.setVisibility(View.INVISIBLE);
+                    case R.id.circularsRB:
+                        addYearRL.setVisibility(View.INVISIBLE);
                         break;
-                    case R.id.deptRB:
-                        mAddYearRL.setVisibility(View.VISIBLE);
+                    case R.id.noticesRB:
+                        addYearRL.setVisibility(View.VISIBLE);
                 }
             }
         });
 
-        mButtonSubmit.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                if(checkNetwork()) {
-                    sendNotice(tempView);
-                }
-                else {
-                    Snackbar.make(mCoordinatorLayout, "No network connection available.", Snackbar.LENGTH_LONG)
-                            .show();
-                }
-            }
-        });
-
-        mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.refresher);
-        mSwipeRefreshLayout.setColorSchemeResources(
+        swipeRefreshLayout.setColorSchemeResources(
                 R.color.colorPrimary,
                 R.color.colorAccent);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
         {
             @Override
             public void onRefresh()
@@ -270,28 +251,27 @@ public class Home extends Fragment {
             }
         });
 
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.rv);
         LinearLayoutManager llm = new LinearLayoutManager(v.getContext());
-        mRecyclerView.setLayoutManager(llm);
+        recyclerView.setLayoutManager(llm);
 
-        mRecyclerView.addOnScrollListener(new RecyclerScroll() {
+        recyclerView.addOnScrollListener(new RecyclerScroll() {
             @Override
             public void show() {
-                mFAB.animate().translationY(0)
+                fabButton.animate().translationY(0)
                         .setInterpolator(new DecelerateInterpolator(2))
                         .start();
             }
 
             @Override
             public void hide() {
-                mFAB.animate().translationY(mFAB.getHeight() + getResources().getDimensionPixelSize(R.dimen.fab_margin))
+                fabButton.animate().translationY(fabButton.getHeight() + getResources().getDimensionPixelSize(R.dimen.fab_margin))
                         .setInterpolator(new AccelerateInterpolator(2))
                         .start();
             }
         });
 
         if(appStartFlag == 0) {
-            mRecyclerView.post(new Runnable() {
+            recyclerView.post(new Runnable() {
                 @Override
                 public void run() {
                     loadNotices();
@@ -328,25 +308,20 @@ public class Home extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         log("onOptionsItemSelected STARTED");
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        //noinspection SimplifiableIfStatement
+
         if(id == R.id.action_sort) {
             if(sortFlag == 0) {
                 sortFlag = 1;
-                initializeAdapter(sortNotices(visibleObjects));
+                initializeAdapter(sortNotices(visibleNotices));
             }
             else {
                 sortFlag = 0;
-                initializeAdapter(visibleObjects);
+                initializeAdapter(visibleNotices);
             }
             return true;
         }
-
         return super.onOptionsItemSelected(item);
-
     }
 
 
@@ -359,7 +334,6 @@ public class Home extends Fragment {
         Collections.sort(sortedList, new Comparator<Notice>() {
             @Override
             public int compare(Notice note1, Notice note2) {
-
                 return note2.priority - note1.priority;
             }
         });
@@ -370,7 +344,7 @@ public class Home extends Fragment {
     // Department is set in the Settings tab.
     public void setFilter(String queryText) {
         try {
-            mSwipeRefreshLayout.setEnabled(false);
+            swipeRefreshLayout.setEnabled(false);
 
             log("setFilter(\"" + queryText + "\") STARTED");
 
@@ -384,16 +358,16 @@ public class Home extends Fragment {
             }
 
             log("setFilter: " + queryText);
-            visibleObjects.clear();
+            visibleNotices.clear();
             queryText = queryText.toLowerCase();
 
             for (Notice item : notices) {
                 final String text = item.tag.toLowerCase();
                 if (text.contains(queryText))
-                    visibleObjects.add(item);
+                    visibleNotices.add(item);
             }
 
-            initializeAdapter(visibleObjects);
+            initializeAdapter(visibleNotices);
         }
         catch(Exception e) {
             log("setFilter: Exception: " + e.getMessage());
@@ -403,17 +377,17 @@ public class Home extends Fragment {
     // Initialises RecyclerView Adapter by passing 'list' as parameter.
     private void initializeAdapter(List<Notice> list){
         log("initializedAdapter() STARTED");
-        RVAdapter adapter = new RVAdapter(list, mCoordinatorLayout, this.getContext(), userRole);
+        RVAdapter adapter = new RVAdapter(list, coordinatorLayout, this.getContext(), userRole);
         adapter.notifyDataSetChanged();
-        mRecyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);
     }
 
-    // Resets visibleObjects to show all Notices.
+    // Resets visibleNotices to show all Notices.
     public void resetNotices() {
-        mSwipeRefreshLayout.setEnabled(true);
-        visibleObjects.clear();
-        visibleObjects.addAll(notices);
-        initializeAdapter(visibleObjects);
+        swipeRefreshLayout.setEnabled(true);
+        visibleNotices.clear();
+        visibleNotices.addAll(notices);
+        initializeAdapter(visibleNotices);
     }
 
     // Loads Notices from the server.
@@ -424,11 +398,11 @@ public class Home extends Fragment {
         log("refreshNoticeData STARTED");
 
         if (checkNetwork()) {
-            new NoticeTransaction(getActivity(), mRecyclerView,
-                    mSwipeRefreshLayout, notices, 0, userRole).execute();
+            new NoticeTransaction(getActivity(), recyclerView,
+                    swipeRefreshLayout, notices, 0, userRole).execute();
 
         } else {
-            Snackbar.make(mCoordinatorLayout, "No network connection available.",
+            Snackbar.make(coordinatorLayout, "No network connection available.",
                     Snackbar.LENGTH_LONG)
                     .show();
         }
@@ -461,13 +435,13 @@ public class Home extends Fragment {
                     JSONArray jArray = new JSONArray(jason);
                     log("loadNotices: jArray length: " + jArray.length());
 
-                    visibleObjects.clear();
+                    visibleNotices.clear();
 
                     for (int i = 0; i < jArray.length(); i++)
                     {
                         JSONObject json_data = jArray.getJSONObject(i);
                         log("loadNotices: json_data " + i + " length: " + json_data.length());
-                        visibleObjects.add(new Notice(json_data.getInt("id"),
+                        visibleNotices.add(new Notice(json_data.getInt("id"),
                                         json_data.getString("user"),
                                         json_data.getString("title"),
                                         json_data.getString("description"),
@@ -479,11 +453,11 @@ public class Home extends Fragment {
                     }
 
                     notices.clear();
-                    notices.addAll(visibleObjects);
-                    initializeAdapter(visibleObjects);
+                    notices.addAll(visibleNotices);
+                    initializeAdapter(visibleNotices);
                 }
                 else {
-                    Snackbar.make(mCoordinatorLayout, "No network connection available.", Snackbar.LENGTH_LONG)
+                    Snackbar.make(coordinatorLayout, "No network connection available.", Snackbar.LENGTH_LONG)
                             .show();
                 }
             }
@@ -495,89 +469,85 @@ public class Home extends Fragment {
         else {
             log("loadNotices: theJson is empty... initialising data");
             try {
-                new NoticeTransaction(getActivity(), mRecyclerView, mSwipeRefreshLayout,
-                        visibleObjects, 0, userRole).execute().get();
+                new NoticeTransaction(getActivity(), recyclerView, swipeRefreshLayout,
+                        visibleNotices, 0, userRole).execute().get();
             }
             catch (Exception e) {
                 log("loadNotices: Exception: " + e.getMessage());
             }
             notices.clear();
-            notices.addAll(visibleObjects);
+            notices.addAll(visibleNotices);
         }
     }
 
-    private void sendNotice(View v) {
+    @OnClick(R.id.submitButton)
+    void sendNotice() {
+        if(checkNetwork()) {
+            String title = editTitle.getText().toString();
+            String desc = editDesc.getText().toString();
+            int priority = (int) ratingBar.getRating();
+            int radioTag = tagRadioGroup.getCheckedRadioButtonId();
 
-        EditText editTitle = (EditText) v.findViewById(R.id.editAddTitle);
-        EditText editDesc = (EditText) v.findViewById(R.id.editAddDesc);
-        RatingBar rbPriority = (RatingBar) v.findViewById(R.id.ratePriority);
-        RadioGroup rgTag = (RadioGroup) v.findViewById(R.id.tagRG);
-        RelativeLayout mAddYearRL = (RelativeLayout) v.findViewById(R.id.addYearRL);
-        CheckBox cbYear2 = (CheckBox) v.findViewById(R.id.cbYear2);
-        CheckBox cbYear3 = (CheckBox) v.findViewById(R.id.cbYear3);
-        CheckBox cbYear4 = (CheckBox) v.findViewById(R.id.cbYear4);
+            String tag = null;
 
-        String title = editTitle.getText().toString();
-        String desc = editDesc.getText().toString();
-        int priority = (int) rbPriority.getRating();
-        int radioTag = rgTag.getCheckedRadioButtonId();
+            switch(radioTag) {
+                case R.id.circularsRB:
+                    tag = "U";
+                    break;
 
-        String tag = null;
-
-        switch(radioTag) {
-            case R.id.univRB:
-                tag = "U";
-                break;
-
-            case R.id.deptRB:
-                if (cbYear2.isChecked() || cbYear3.isChecked() || cbYear4.isChecked()) {
-                    tag = "";
-                    if (cbYear2.isChecked()) {
-                        tag = tag + " 2";
+                case R.id.noticesRB:
+                    if (cbYear2.isChecked() || cbYear3.isChecked() || cbYear4.isChecked()) {
+                        tag = "";
+                        if (cbYear2.isChecked()) {
+                            tag = tag + " 2";
+                        }
+                        if (cbYear3.isChecked()) {
+                            tag = tag + " 3";
+                        }
+                        if (cbYear4.isChecked()) {
+                            tag = tag + " 4";
+                        }
                     }
-                    if (cbYear3.isChecked()) {
-                        tag = tag + " 3";
-                    }
-                    if (cbYear4.isChecked()) {
-                        tag = tag + " 4";
-                    }
+                    break;
+            }
+
+            if(!title.isEmpty() && !desc.isEmpty() && tag != null && (priority > 0 && priority <= 5)) {
+                try {
+                    String user = userJSON.getString("username");
+                    log("sendNotice: user: " + userJSON.getString("username"));
+
+                    String jason = "{"
+                            +   "\"user\":"           + "\"" + user      + "\"" +   ","
+                            +   "\"title\":"          + "\"" + title     + "\"" +   ","
+                            +   "\"description\":"    + "\"" + desc      + "\"" +   ","
+                            +   "\"tag\":"            + "\"" + tag       + "\"" +   ","
+                            +   "\"priority\":"       + "\"" + priority  + "\""
+                            + "}";
+
+                    JSONObject mJSON = new JSONObject(jason);
+                    new NoticeTransaction(getActivity(), mJSON, 1, userRole).execute();
                 }
-                break;
-        }
+                catch (JSONException e) {
+                    log("sendNotice: JSONException: " + e.getMessage());
+                }
 
-        if(!title.isEmpty() && !desc.isEmpty() && tag != null && (priority > 0 && priority <= 5)) {
-            try {
-                String user = userJSON.getString("username");
-                log("sendNotice: user: " + userJSON.getString("username"));
+                editTitle.getText().clear();
+                editDesc.getText().clear();
+                ratingBar.setRating(0);
+                tagRadioGroup.clearCheck();
+                addYearRL.setVisibility(View.INVISIBLE);
 
-                String jason = "{"
-                             +   "\"user\":"           + "\"" + user      + "\"" +   ","
-                             +   "\"title\":"          + "\"" + title     + "\"" +   ","
-                             +   "\"description\":"    + "\"" + desc      + "\"" +   ","
-                             +   "\"tag\":"            + "\"" + tag       + "\"" +   ","
-                             +   "\"priority\":"       + "\"" + priority  + "\""
-                             + "}";
-
-                JSONObject mJSON = new JSONObject(jason);
-                new NoticeTransaction(getActivity(), mJSON, 1, userRole).execute();
+                cancelButton.callOnClick();
             }
-            catch (JSONException e) {
-                log("sendNotice: JSONException: " + e.getMessage());
+            else {
+                Snackbar.make(coordinatorLayout, "Please enter all fields.", Snackbar.LENGTH_LONG)
+                        .show();
             }
-
-            editTitle.getText().clear();
-            editDesc.getText().clear();
-            rbPriority.setRating(0);
-            rgTag.clearCheck();
-            mAddYearRL.setVisibility(View.INVISIBLE);
-
-            mButtonCancel.callOnClick();
         }
         else {
-            Snackbar.make(mCoordinatorLayout, "Please enter all fields.", Snackbar.LENGTH_LONG)
+            Snackbar.make(coordinatorLayout, "No network connection available.", Snackbar.LENGTH_LONG)
                     .show();
         }
-
     }
 
     public void deleteNotice(final View view, final int noticeId, final Context context, final String role) {

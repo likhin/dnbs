@@ -9,9 +9,12 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class DNBS extends AppCompatActivity {
 
-    private Toolbar mToolbar;
+    @BindView(R.id.toolbar) Toolbar mToolbar;
     private static final int TIME_INTERVAL = 2000;
     private long mBackPressed;
 
@@ -20,6 +23,7 @@ public class DNBS extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setTheme(R.style.MyMaterialTheme);
         setContentView(R.layout.activity_dnbs);
+        ButterKnife.bind(this);
 
         log("onCreate STARTED");
 
@@ -33,7 +37,6 @@ public class DNBS extends AppCompatActivity {
                     .commit();
         }
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbar.setTitle(R.string.title_home);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

@@ -1,7 +1,6 @@
 package com.nikhilbawane.dnbs;
 
 import android.content.Context;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,51 +13,99 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class RVAdapter extends RecyclerView.Adapter<RVAdapter.NoticeViewHolder> {
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+class RVAdapter extends RecyclerView.Adapter<RVAdapter.NoticeViewHolder> {
 
     List<Notice> notices;
     String role;
     Context context;
     View view;
 
-    public static class NoticeViewHolder extends RecyclerView.ViewHolder {
+    static class NoticeViewHolder extends RecyclerView.ViewHolder {
 
-        CardView cv;
         int id = -1;
-        TextView noticeTitle;
-        TextView noticeDesc;
-        TextView noticeTag;
-        TextView noticeDate;
-        RatingBar noticePriority;
-        ImageView noticeDelete;
+        @BindView(R.id.notice_title) TextView noticeTitle;
+        @BindView(R.id.notice_desc) TextView noticeDesc;
+        @BindView(R.id.notice_tag) TextView noticeTag;
+        @BindView(R.id.notice_date) TextView noticeDate;
+        @BindView(R.id.notice_priority) RatingBar noticePriority;
+        @BindView(R.id.notice_delete) ImageView noticeDelete;
 
-        NoticeViewHolder(View itemView, final String userRole) {
+        NoticeViewHolder(View itemView) {
             super(itemView);
-            cv = (CardView) itemView.findViewById(R.id.cv);
-            noticeTitle = (TextView) itemView.findViewById(R.id.notice_title);
-            noticeDesc = (TextView) itemView.findViewById(R.id.notice_desc);
-            noticeTag = (TextView) itemView.findViewById(R.id.notice_tag);
-            noticeDate = (TextView) itemView.findViewById(R.id.notice_date);
-            noticePriority = (RatingBar) itemView.findViewById(R.id.notice_priority);
-            noticeDelete = (ImageView) itemView.findViewById(R.id.notice_delete);
+            ButterKnife.bind(this, itemView);
+        }
 
-            cv.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    if (noticeDesc.getVisibility() == View.VISIBLE) {
-                        //noticeDesc.setVisibility(View.GONE);
-                        collapse(noticeDesc);
-                    }
+        @OnClick(R.id.cardNotice)
+        void onNoticeClick() {
+            if (noticeDesc.getVisibility() == View.VISIBLE) {
+                collapse(noticeDesc);
+                //noticeDesc.setVisibility(View.GONE);
+            }
+            else {
+                expand(noticeDesc);
+                //noticeDesc.setVisibility(View.VISIBLE);
+            }
+        }
 
-                    else {
-                        //noticeDesc.setVisibility(View.VISIBLE);
-                        expand(noticeDesc);
+        private void expand(final View v) {
+            v.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            final int targetHeight = v.getMeasuredHeight();
+
+            v.getLayoutParams().height = 0;
+            v.setVisibility(View.VISIBLE);
+            Animation a = new Animation()
+            {
+                @Override
+                protected void applyTransformation(float interpolatedTime, Transformation t) {
+                    v.getLayoutParams().height = interpolatedTime == 1
+                            ? ViewGroup.LayoutParams.WRAP_CONTENT
+                            : (int)(targetHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+
+                @Override
+                public boolean willChangeBounds() {
+                    return true;
+                }
+            };
+
+            // 1dp/ms
+            a.setDuration((int) (targetHeight / v.getContext().getResources().getDisplayMetrics().density));
+            v.startAnimation(a);
+        }
+
+        private void collapse(final View v) {
+            final int initialHeight = v.getMeasuredHeight();
+
+            Animation a = new Animation()
+            {
+                @Override
+                protected void applyTransformation(float interpolatedTime, Transformation t) {
+                    if(interpolatedTime == 1){
+                        v.setVisibility(View.INVISIBLE);
+                    }else{
+                        v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                        v.requestLayout();
                     }
                 }
-            });
+
+                @Override
+                public boolean willChangeBounds() {
+                    return true;
+                }
+            };
+
+            // 1dp/ms
+            a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+            v.startAnimation(a);
         }
     }
 
-    public RVAdapter(List<Notice> notices, View view, Context context, String role){
+    RVAdapter(List<Notice> notices, View view, Context context, String role){
         this.notices = notices;
         this.view = view;
         this.context = context;
@@ -73,7 +120,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.NoticeViewHolder> 
     @Override
     public NoticeViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_notice, viewGroup, false);
-        NoticeViewHolder pvh = new NoticeViewHolder(v, role);
+        NoticeViewHolder pvh = new NoticeViewHolder(v);
         return pvh;
     }
 
@@ -113,59 +160,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.NoticeViewHolder> 
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
-    }
-
-    public static void expand(final View v) {
-        v.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        final int targetHeight = v.getMeasuredHeight();
-
-        v.getLayoutParams().height = 0;
-        v.setVisibility(View.VISIBLE);
-        Animation a = new Animation()
-        {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                v.getLayoutParams().height = interpolatedTime == 1
-                        ? ViewGroup.LayoutParams.WRAP_CONTENT
-                        : (int)(targetHeight * interpolatedTime);
-                v.requestLayout();
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-
-        // 1dp/ms
-        a.setDuration((int) (targetHeight / v.getContext().getResources().getDisplayMetrics().density));
-        v.startAnimation(a);
-    }
-
-    public static void collapse(final View v) {
-        final int initialHeight = v.getMeasuredHeight();
-
-        Animation a = new Animation()
-        {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                if(interpolatedTime == 1){
-                    v.setVisibility(View.GONE);
-                }else{
-                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
-                    v.requestLayout();
-                }
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-
-        // 1dp/ms
-        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
-        v.startAnimation(a);
     }
 
 }
